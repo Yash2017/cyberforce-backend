@@ -1,6 +1,8 @@
 const uploadFile = require("../middleware/upload");
 const fs = require("fs");
 const baseUrl = "http://localhost:8080/files/";
+const mongoose = require("mongoose");
+const EmailModel = require("../model/Email");
 
 const upload = async (req, res) => {
   try {
@@ -10,6 +12,16 @@ const upload = async (req, res) => {
       return res.status(400).send({ message: "Please upload a file!" });
     }
 
+    await mongoose.connect(
+      "mongodb+srv://yashkakade:yashkakade@bug-tracker.np7pj.mongodb.net/cyberforce?retryWrites=true&w=majority"
+    );
+    await EmailModel.create({
+      number: req.body.number,
+      name: req.body.name,
+      email: req.body.email,
+      fileName: req.file.originalname,
+      filePath: req.file.path,
+    });
     res.status(200).send({
       message: "Uploaded the file successfully: " + req.file.originalname,
     });
@@ -29,7 +41,7 @@ const upload = async (req, res) => {
 };
 
 const getListFiles = (req, res) => {
-  const directoryPath = __basedir + "/resources/static/assets/uploads/";
+  const directoryPath = __basedir + "/file/";
 
   fs.readdir(directoryPath, function (err, files) {
     if (err) {
@@ -53,8 +65,8 @@ const getListFiles = (req, res) => {
 
 const download = (req, res) => {
   const fileName = req.params.name;
-  const directoryPath = __basedir + "/resources/static/assets/uploads/";
-
+  const directoryPath = __basedir + "/file/";
+  // res.setHeader("Content-disposition", "attachment; filename=" + fileName);
   res.download(directoryPath + fileName, fileName, (err) => {
     if (err) {
       res.status(500).send({
@@ -66,7 +78,7 @@ const download = (req, res) => {
 
 const remove = (req, res) => {
   const fileName = req.params.name;
-  const directoryPath = __basedir + "/resources/static/assets/uploads/";
+  const directoryPath = __basedir + "/file/";
 
   fs.unlink(directoryPath + fileName, (err) => {
     if (err) {
@@ -83,7 +95,7 @@ const remove = (req, res) => {
 
 const removeSync = (req, res) => {
   const fileName = req.params.name;
-  const directoryPath = __basedir + "/resources/static/assets/uploads/";
+  const directoryPath = __basedir + "/file/";
 
   try {
     fs.unlinkSync(directoryPath + fileName);
@@ -98,10 +110,22 @@ const removeSync = (req, res) => {
   }
 };
 
+const getData = async (req, res) => {
+  await mongoose.connect(
+    "mongodb+srv://yashkakade:yashkakade@bug-tracker.np7pj.mongodb.net/cyberforce?retryWrites=true&w=majority"
+  );
+  try {
+    return res.json(await EmailModel.find({}));
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   upload,
   getListFiles,
   download,
   remove,
   removeSync,
+  getData,
 };

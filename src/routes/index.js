@@ -7,7 +7,7 @@ let routes = (app) => {
   router.get("/files", controller.getListFiles);
   router.get("/files/:name", controller.download);
   router.delete("/files/:name", controller.remove);
-
+  router.get("/getdata", controller.getData);
   app.use(router);
 };
 
