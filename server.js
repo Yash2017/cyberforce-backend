@@ -8,6 +8,10 @@ var corsOptions = {
   origin: "http://10.0.38.79",
 };
 
+// var corsOptions = {
+//   origin: "http://localhost:3000",
+// };
+
 app.use(cors(corsOptions));
 
 const initRoutes = require("./src/routes");
